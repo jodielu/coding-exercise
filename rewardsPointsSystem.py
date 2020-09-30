@@ -1,6 +1,6 @@
 """
 
-PROBLEM: Management needs to know how many of each item they are selling each 
+PROBLEM: Management needs to know how many of each item they are selling each
 day and what each customer’s current reward points balance is.
 
 Design a system that parses the log file and:
@@ -11,7 +11,10 @@ Here are some considerations for the rewards system you want to create:
 
 - For each purchase, a customer can spend a certain amount of reward points for their purchase.
 - Some customers come to the store multiple times per day.
-- Customers earn 1 reward point for every 18 dollars spent, unless they spend more than $250 per day, in which case they earn 1 reward point for every 17 dollars spent. These reward points are given to the customers at the **end** of each day, not immediately after the purchase.
+- Customers earn 1 reward point for every 18 dollars spent,
+  unless they spend more than $250 per day, in which case they earn
+  1 reward point for every 17 dollars spent. These reward points are given
+  to the customers at the **end** of each day, not immediately after the purchase.
 - For each LogEntry, we want to keep track of:
     - Customer ID
     - Number of reward points used for that purchase
@@ -19,9 +22,11 @@ Here are some considerations for the rewards system you want to create:
 
 There can also be malformed logs in which any of the three properties in the LogEntry are 'None'.
 If this is the case, please address them in the following ways:
-- If there is no customer ID, do not count the rewards points. Instead, only calculate the purchase counts for the items
+- If there is no customer ID, do not count the rewards points. 
+  Instead, only calculate the purchase counts for the items
 - If there is no rewards points specified, assume rewards points = 0
-- If there is no list of items purchased, then this is an error in the system. Please add this LogEntry to a error log (a list of LogEntry called 'error')
+- If there is no list of items purchased, then this is an error in the system. 
+  Please add this LogEntry to a error log (a list of LogEntry called 'error')
 
 Example- this is written in casual terms, and must be modified to actual data structures
 	Items:
@@ -31,7 +36,6 @@ Example- this is written in casual terms, and must be modified to actual data st
 		- Customer 1 purchased 2 bananas and 1 apple; he used 100 rewards points
 		- Customer 2 purchased 1 banana and 1 apple; she used 0 rewards points
 		- Customer 1 purchased 1 banana; he used 0 rewards points
-
 """
 
 
