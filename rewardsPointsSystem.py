@@ -22,10 +22,10 @@ Here are some considerations for the rewards system you want to create:
 
 There can also be malformed logs in which any of the three properties in the LogEntry are 'None'.
 If this is the case, please address them in the following ways:
-- If there is no customer ID, do not count the rewards points. 
+- If there is no customer ID, do not count the rewards points.
   Instead, only calculate the purchase counts for the items
 - If there is no rewards points specified, assume rewards points = 0
-- If there is no list of items purchased, then this is an error in the system. 
+- If there is no list of items purchased, then this is an error in the system.
   Please add this LogEntry to a error log (a list of LogEntry called 'error')
 
 Example- this is written in casual terms, and must be modified to actual data structures
@@ -64,38 +64,20 @@ class RewardsSystem:
             reward_points_used = log_entry[1] or 0
             items_purchased = log_entry[2]
 
-            if not customer_id:
-                total_spent = 0
-                for item in items_purchased:
-                    total_spent += item.itemId * item.item_price
-
-                    # Update items sold
-                    for purchase in items_purchased:
-                        self.items_purchased[purchase.itemId] = self.items_purchased.get(
-                            purchase.itemId, 0) + 1
-
-                    items_purchased = len(items_purchased) == 0
-                    if items_purchased:
-                        raise ValueError('Items purchased were not recorded.')
-
-            else:
-
+            if customer_id:
                 # Subtract rewards points used from customer
                 self.rewards_points[customer_id] -= reward_points_used
-
-                total_spent = 0
-                for item in items_purchased:
-                    total_spent += item.itemId * item.item_price
-
                 amount_spent[customer_id] = amount_spent.get(
                     customer_id, 0) + total_spent
 
-                # Update items sold
-                for purchase in items_purchased:
-                    self.items_purchased[purchase.itemId] = self.items_purchased.get(
-                        purchase.itemId, 0) + 1
+            total_spent = 0
+            for item in items_purchased:
+                total_spent += item.itemId * item.item_price
 
-                print(self.reward_points)
+            # Update items sold
+            for purchase in items_purchased:
+                self.items_purchased[purchase.itemId] = self.items_purchased.get(
+                    purchase.itemId, 0) + 1
 
         # At end of day, award reward points back to customers based on how much they spent
         for customer_id in amount_spent:
