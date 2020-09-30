@@ -56,6 +56,9 @@ class RewardsSystem:
         self.rewards_points = defaultdict(int)
         self.items_purchased = defaultdict(int)
 
+    def get_purchased_item_by_id(self, item_id):
+        return self.items_purchased.get(item_id, 0)
+
     def process_log(self, log):
         amount_spent = defaultdict(int)
 
@@ -76,8 +79,8 @@ class RewardsSystem:
 
             # Update items sold
             for purchase in items_purchased:
-                self.items_purchased[purchase.itemId] = self.items_purchased.get(
-                    purchase.itemId, 0) + 1
+                self.items_purchased[purchase.itemId] = self.get_purchased_item_by_id(
+                    purchase.itemId) + 1
 
         # At end of day, award reward points back to customers based on how much they spent
         for customer_id in amount_spent:
@@ -88,6 +91,3 @@ class RewardsSystem:
 
             # Update customer rewards points
             self.rewards_points[customer_id] += rewards_points
-
-    def get_purchased_item_by_id(self, item_id):
-        return self.items_purchased.get(item_id, 0)
