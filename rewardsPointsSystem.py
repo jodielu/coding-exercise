@@ -61,7 +61,7 @@ class RewardsSystem:
 
         for log_entry in log:
             customer_id = log_entry[0]
-            reward_points_used = log_entry[1]
+            reward_points_used = log_entry[1] or 0
             items_purchased = log_entry[2]
 
             if not customer_id:
