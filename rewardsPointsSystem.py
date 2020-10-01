@@ -43,59 +43,50 @@ from collections import defaultdict
 
 class RewardsSystem:
   REWARDS_RATIO_BELOW = 18
+  REWARDS_RATIO_ABOVE = 17
   REWARDS_CUTOFF = 250
 
   def __init__(self):
     self.rewards_points = defaultdict(int)
-    self.items_purchased = defaultdict(int)
+    self.total_items_purchased = defaultdict(int)
 
   def process_log(self, log):
     amount_spent = defaultdict(int)
 
     for log_entry in log:
       customer_id = log_entry[0]
-      reward_points_used = log_entry[1]
+      reward_points_used = log_entry[1] or 0
       items_purchased = log_entry[2]
+      
+      if not items_purchased:
+        # TODO add to error_log (not sure if this is supposed to be some external function)
+        continue
+      for item in items_purchased:
+        # update amount spect
+        total_spent += item.item_price
 
-      if not customer_id:
-        total_spent = 0
-        for item in items_purchased:
-          total_spent += item.itemId * item.item_price
+        # update items sold
+        self.total_items_purchased[item.itemId] += 1
 
-          # Update items sold
-          for purchase in items_purchased:
-            self.items_purchased[purchase.itemId] = self.items_purchased.get(purchase.itemId, 0) + 1
+      if customer_id != None:
+        if self.rewards_points[customer_id] < reward_points_used:
+          self.rewards_points[customer_id] = 0
+          # TODO add to error_log about going under rewards amount
+        else:
+          self.rewards_points[customer_id] -= reward_points_used
+        amount_spent[customer_id] += total_spent
+      total_spent = 0
 
-          items_purchased = len(items_purchased) == 0
-          if items_purchased:
-            raise ValueError('Items purchased were not recorded.')
-
-      else:
-
-        # Subtract rewards points used from customer
-        self.rewards_points[customer_id] -= reward_points_used
-
-        total_spent = 0
-        for item in items_purchased:
-          total_spent += item.itemId * item.item_price
-
-        amount_spent[customer_id] = amount_spent.get(customer_id, 0) + total_spent
-
-        # Update items sold
-        for purchase in items_purchased:
-          self.items_purchased[purchase.itemId] = self.items_purchased.get(purchase.itemId, 0) + 1
-
-        print(self.reward_points)
 
     # At end of day, award reward points back to customers based on how much they spent
     for customer_id in amount_spent:
       # Calculate rewards points received
       rewards_points = amount_spent[customer_id] // RewardsSystem.REWARDS_RATIO_BELOW
       if amount_spent > RewardsSystem.REWARDS_CUTOFF:
-        rewards_points =  amount_spent[customer_id] // 17 
+        rewards_points =  amount_spent[customer_id] // RewardsSystem.REWARDS_RATIO_ABOVE
 
       # Update customer rewards points
       self.rewards_points[customer_id] += rewards_points
 
   def get_items_purchased(self, item_id):
-    return self.items_purchased[item_id]
+    return self.total_items_purchased[item_id]
