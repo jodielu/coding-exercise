@@ -33,15 +33,21 @@ Example- this is written in casual terms, and must be modified to actual data st
 		- Customer 1 purchased 1 banana; he used 0 rewards points
 
 """
+from collections import defaultdict
 
 class Item:
-  def __init__(self, itemId, item_price):
-    self.itemId = itemId
-    self.item_price = item_price
+  def __init__(self, id, price):
+    self.id = id
+    self.price = price      
 
-from collections import defaultdict    
+class Log:
+  def __init__(self, customer_id, reward_points_used, items_purchased):
+    self.customer_id = customer_id
+    self.rewards_points_used = reward_points_used
+    self.items_purchased = items_purchased
 
 class RewardsSystem:
+  REWARDS_RATIO_ABOVE = 17
   REWARDS_RATIO_BELOW = 18
   REWARDS_CUTOFF = 250
 
@@ -49,53 +55,35 @@ class RewardsSystem:
     self.rewards_points = defaultdict(int)
     self.items_purchased = defaultdict(int)
 
-  def process_log(self, log):
+  def process_log(self, daily_logs):
     amount_spent = defaultdict(int)
 
-    for log_entry in log:
-      customer_id = log_entry[0]
-      reward_points_used = log_entry[1]
-      items_purchased = log_entry[2]
+    for log in daily_logs:
 
-      if not customer_id:
-        total_spent = 0
-        for item in items_purchased:
-          total_spent += item.itemId * item.item_price
+      # Error if no list of items purchased
+      if len(log.items_purchased) == 0:
+        raise ValueError('Items purchased were not recorded.')
+        continue
 
-          # Update items sold
-          for purchase in items_purchased:
-            self.items_purchased[purchase.itemId] = self.items_purchased.get(purchase.itemId, 0) + 1
-
-          items_purchased = len(items_purchased) == 0
-          if items_purchased:
-            raise ValueError('Items purchased were not recorded.')
-
-      else:
-
-        # Subtract rewards points used from customer
-        self.rewards_points[customer_id] -= reward_points_used
-
-        total_spent = 0
-        for item in items_purchased:
-          total_spent += item.itemId * item.item_price
-
-        amount_spent[customer_id] = amount_spent.get(customer_id, 0) + total_spent
-
+      total_spent = 0
+      for item in log.items_purchased:
+        total_spent += item.price
         # Update items sold
-        for purchase in items_purchased:
-          self.items_purchased[purchase.itemId] = self.items_purchased.get(purchase.itemId, 0) + 1
+        self.items_purchased[item.id] += 1
 
-        print(self.reward_points)
+      if log.customer_id != None:
+        # Subtract rewards points used from customer
+        self.rewards_points[log.customer_id] -= log.reward_points_used if log.reward_points_used > 0 else 0
 
-    # At end of day, award reward points back to customers based on how much they spent
+        amount_spent[log.customer_id] += total_spent
+
+      # At end of day, award reward points back to customers based on how much they spent
     for customer_id in amount_spent:
-      # Calculate rewards points received
-      rewards_points = amount_spent[customer_id] // RewardsSystem.REWARDS_RATIO_BELOW
+      
       if amount_spent > RewardsSystem.REWARDS_CUTOFF:
-        rewards_points =  amount_spent[customer_id] // 17 
+        rewards_points = amount_spent[customer_id] // RewardsSystem.REWARDS_RATIO_ABOVE
+      else:
+        rewards_points = amount_spent[customer_id] // RewardsSystem.REWARDS_RATIO_BELOW
 
       # Update customer rewards points
       self.rewards_points[customer_id] += rewards_points
-
-  def get_items_purchased(self, item_id):
-    return self.items_purchased[item_id]
