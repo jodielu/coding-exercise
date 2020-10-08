@@ -1,0 +1,14 @@
+- bring reused code outside of if statement
+- check that subtracting points does not bring below 0
+- not using defaultdict
+- nested for loops over the same list
+- get rid of print statements
+- poor naming of boolean
+- put boolean directly into conditional statement
+- don't use raise in the middle of the loop if we want to continue
+- use constants instead of 17
+- add default for rewards points to be 0
+- rearrange logic so that we only update amount_spent if we have a customer id
+- update `items_purchased` variable name so it doesn't match
+- add error log?
+
